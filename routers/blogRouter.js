@@ -26,7 +26,7 @@ router.post('/', (req, res) => {
 
 router.post('/:id/comments', (req, res) => {
     const { id } = req.params;
-    const newComment = req.body;
+    const newComment = { ...req.body, post_id: id };
     if (!newComment.text) {
         res.status(400).json({ errorMessage: 'Please provide text for the comment.' });
     } else {
@@ -35,7 +35,11 @@ router.post('/:id/comments', (req, res) => {
                 if (!blogPost) {
                     res.status(404).json({ errorMessage: 'The post with the specified ID does not exist.' });
                 } else {
-                    res.status(201).json(blogPost);
+                    blog.findCommentById(blogPost)
+                        .then(comment => {
+                            console.log(comment);
+                            res.status(201).json(blogPost);
+                        })
                 }
             })
             .catch(err => {
