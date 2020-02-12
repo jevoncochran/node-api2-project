@@ -10,8 +10,12 @@ router.post('/', (req, res) => {
         res.status(400).json({ errorMessage: 'Please provide title and contents for the post.' });
     } else {
         blog.insert(newPost)
-            .then(post => {
-                res.status(201).json(post);
+            .then(({id}) => {
+                blog.findById(id)
+                .then(blogPost => {
+                    console.log(blogPost);
+                    res.status(201).json(blogPost);
+                })
             })
             .catch(err => {
                 console.log(err);
@@ -111,7 +115,11 @@ router.put('/:id', (req, res) => {
                 if (!blogPost) {
                     res.status(404).json({ errorMessage: 'The post with the specified ID does not exist.' });
                 } else {
-                    res.status(200).json(blogPost);
+                    blog.findById(id)
+                        .then(blogPost => {
+                            console.log(blogPost);
+                            res.status(200).json(blogPost);
+                        })
                 }
             })
             .catch(err => {
