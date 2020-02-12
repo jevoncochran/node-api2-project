@@ -24,21 +24,23 @@ router.post('/', (req, res) => {
     }
 })
 
-router.post('/:id/comments', (req, res) => {
-    const { id } = req.params;
-    const newComment = { ...req.body, post_id: id };
-    if (!newComment.text) {
+router.post('/:post_id/comments', (req, res) => {
+    const { post_id } = req.params;
+    const { newComment } = req.body;
+    console.log('this is the text from the comments: ' + newComment)
+    if (!newComment) {
         res.status(400).json({ errorMessage: 'Please provide text for the comment.' });
     } else {
-        blog.insertComment(newComment)
-            .then(blogPost => {
-                if (!blogPost) {
+        blog.insertComment({newComment, post_id})
+            .then(comment => {
+                console.log(comment);
+                if (!comment.length) {
                     res.status(404).json({ errorMessage: 'The post with the specified ID does not exist.' });
                 } else {
-                    blog.findCommentById(blogPost)
+                    blog.findCommentById(comment)
                         .then(comment => {
                             console.log(comment);
-                            res.status(201).json(blogPost);
+                            res.status(201).json(comment);
                         })
                 }
             })
@@ -64,7 +66,8 @@ router.get('/:id', (req, res) => {
     const { id } = req.params;
     blog.findById(id)
         .then(blogPost => {
-            if (!blogPost) {
+            console.log(blogPost);
+            if (!blogPost.length) {
                 res.status(404).json({ errorMessage: 'The post with the specified ID does not exist.' });
             } else {
                 res.status(200).json(blogPost);
@@ -80,7 +83,7 @@ router.get('/:id/comments', (req, res) => {
     const { id } = req.params;
     blog.findPostComments(id)
         .then(blogPost => {
-            if (!blogPost) {
+            if (!blogPost.length) {
                 res.status(404).json({ errorMessage: 'The post with the specified ID does not exist.' });
             } else {
                 res.status(200).json(blogPost);
