@@ -26,23 +26,25 @@ router.post('/', (req, res) => {
 
 router.post('/:post_id/comments', (req, res) => {
     const { post_id } = req.params;
-    const { newComment } = req.body;
-    console.log('this is the text from the comments: ' + newComment)
-    if (!newComment) {
+    const { text } = req.body;
+    console.log('this is the text from the comments: ' + text)
+    if (!text) {
         res.status(400).json({ errorMessage: 'Please provide text for the comment.' });
     } else {
-        blog.insertComment({newComment, post_id})
-            .then(comment => {
-                console.log(comment);
-                if (!comment.length) {
-                    res.status(404).json({ errorMessage: 'The post with the specified ID does not exist.' });
-                } else {
-                    blog.findCommentById(comment)
-                        .then(comment => {
-                            console.log(comment);
-                            res.status(201).json(comment);
+        blog.insertComment({text, post_id})
+            .then(({id: commentId}) => {
+                blog.findCommentById(commentId)
+                    .then(comment => {
+                        if (!comment.length) {
+                            res.status(404).json({ errorMessage: 'The post with the specified ID does not exist.' });
+                        } else {
+                                    res.status(201).json(comment);
+                                }
                         })
-                }
+                        .catch(err => {
+                            console.log(err);
+                            res.status(500).json({ errorMessage: 'error adding comment'});
+                        })
             })
             .catch(err => {
                 console.log(err);
